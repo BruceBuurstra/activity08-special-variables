@@ -1,6 +1,6 @@
 ---
 title: "Activity 8"
-author: "Name"
+author: "Bruce Buurstra"
 output: github_document
 ---
 
@@ -10,7 +10,10 @@ Load the entirety of the `{tidyverse}`.
 You will do a little work with dates in this activity so also load `{lubridate}`.
 Be sure to avoid printing out any unnecessary information and give the code chunk a meaningful name.
 
-
+```{r load packages, message=FALSE}
+library(tidyverse)
+library(lubridate)
+```
 
 
 Cheatsheets that you might want to add to your collection:
@@ -24,7 +27,9 @@ Therefore, you will need to use either `read_delim` with a `delim = ...` argumen
 Assign the file to a meaningful object name, be sure to avoid printing any unnecessary information, and give the code chunk a meaningful name.
 
 
-
+```{r load data set}
+billboard_songs <- read_tsv(here::here("data", "billboard_songs.txt") )
+```
 
 These data include information on song popularity.
 In the US, the Billboard Hot 100 is a list that comes out every week, showing the 100 most played songs that week.
@@ -46,7 +51,7 @@ This is a long dataset (34,605 observations)!
 When you look at ``chart date`` you'll notice that it was read in as a numeric (`<dbl>`) variable type.
 What does the format of the date appear to be in?
 
-**Response**:
+**Response**:ymd
 
 
 In this activity, we will be using `str_...` functions to split or find patterns in strings of information.
@@ -58,7 +63,14 @@ Do the following with your dataset:
 
 Once you have verified that this worked, overwrite your data object.
 
-
+```{r creating dates in data}
+billboard_songs <- billboard_songs %>%
+   mutate(date = as.character(`chart date`),
+          year = str_sub(date, 1, 4), 
+          month = str_sub(date, 5, 6), 
+          day = str_sub(date, 7, 8), 
+          date = make_date(year, month, day))
+```
 
 
 #### Analyzing using dates
@@ -66,17 +78,25 @@ Once you have verified that this worked, overwrite your data object.
 What 10 songs spent the longest on the charts?
 Give only the title, artists, and weeks.
 
-
+```{r top10songs}
+billboard_songs%>%
+  arrange(desc(`weeks on chart`))%>%
+  select(title, artist, `weeks on chart`)%>%
+  head(10)
+```
 
 
 **Response**:
 
-
 What date did the oldest song(s) in this dataset leave the charts?
 Give only the *distinct* dates.
 
-
-
+```{r}
+billboard_songs %>%
+  arrange(date)%>%
+  #mutate(date_left = date + weeks(`weeks on chart`))%>%
+  distinct(date)
+```
 
 **Response**:
 
@@ -103,6 +123,12 @@ First, create a vector object called `artist_credentials` that takes your datase
 The `pull` function is like `select` except that it outputs a vector rather than a data frame (tibble).
 Using this function will help us avoid many "`coercing`" warnings - I find it easier to work with vectors of strings.
 
+```{r pull artist column}
+artist_credentials <- billboard_songs %>%
+  pull(artist)
+```
+
+
 Using the `artist_credentials` vector, do the following. I recommend that you do one bullet at time and verify that it worked.
 
 - Use `str_subset` to pick only the observations that only include `"featuring"`,*then*
@@ -110,10 +136,13 @@ Using the `artist_credentials` vector, do the following. I recommend that you do
 - Use `str_split` to separate entries with multiple featured artist - these could include `,`, `&`, ` or ` (note the whitespace), or ` and ` (note the whitespace) (this should produce a list), *then*
 - Use `unlist` to lengthen all featured artists into one vector (compare the output here to the output from the previous bullet point), *then*
 - Use `str_trim` to remove whitespace from `"both"` sides of each entry.
-
+?str_replace_all
 When you verify that this works, save this information into an object called `feat_artist`.
 
-
+```{r}
+str1 <- str_subset(artist_credentials, "featuring")
+str2 <- str_replace_all(str1, ".{1,}featuring", "")
+```
 
 
 Now you can use this information to answer the question above.
