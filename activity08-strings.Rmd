@@ -146,7 +146,6 @@ str3 <- str_split(str2, ",")
 str4 <- str_split(str3, "&")
 str5 <- str_split(str4, " or ")
 str6 <- str_split(str5, " and ")
-str6
 str7 <- unlist(str6)
 feat_artist <- str7
 ```
@@ -179,15 +178,26 @@ When you verify that this works, save this information into an object called `co
 
 ```{r}
 str1 <- str_replace_all(artist_credentials, " featuring.{1,}", "")
-str2 <- str_extract_all(str1, c(",", "&"))
-str3 <- unlist(str2)
+str2 <- str_split(str1, ",")
+str3 <- str_split(str2, "&")
+str4 <- unlist(str3)
+str5 <- str_trim(str4, side = "both")
+coll_artist <- str5
 ```
 
+
+```{r}
+coll_artists <- as.data.frame(coll_artist)
+coll_artists %>%
+  group_by(coll_artist)%>%
+  summarise(count = n())%>%
+  arrange(desc(count))
+```
 
 
 Now you can use this information to answer the question above.
 
-
+Glee Cast
 
 
 #### Challenge 1
